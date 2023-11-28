@@ -20,7 +20,7 @@ const auth = (req, res, next) => {
     }
 };
 
-server.get("/users", (req, res) => {
+server.get("/products", (req, res) => {
     const productHTML = products
         .map((product) => {
             return `
@@ -70,11 +70,36 @@ server.get("/users", (req, res) => {
     // console.log(finalHTML,"finalHTML")
 });
 
-server.get("/products", auth, (req, res) => {
+server.get("/products/:id", (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const prd = products.find((p) => p.id === +id);
+    if (!prd) {
+        return res.status(404).send({
+            error: "Product not found",
+        });
+    }  
+ 
+    const productHTML = `
+        <div class="card m-2 col-sm-6 col-12 col-md-6 col-lg-4 col-xl-3 shadow-sm p-3 mb-5 bg-body rounded">
+            <img src="${prd.thumbnail}" style="height:14rem" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title text-dark">${prd.title}</h5>
+                <p class="card-text">${prd.description}</p>
+                <!-- Other product details -->
+            </div>
+        </div>`;
+
+    res.setHeader("Content-Type", "text/html");
+    res.end(productHTML); 
+});
+
+
+server.get("/json", auth, (req, res) => {
     res.json(products);
 });
 
-server.get("/products/:id", (req, res) => {
+server.get("/json/:id", (req, res) => {
     let id = req.params.id;
     const prd = products.find((p) => p.id === +id);
     if (!prd) {
@@ -84,7 +109,7 @@ server.get("/products/:id", (req, res) => {
     }
     res.json(prd); // Respond with the product found
 });
-
+ 
 server.post("/products", (req, res) => {
     console.log(req.body);
     // Push the new product to the array
